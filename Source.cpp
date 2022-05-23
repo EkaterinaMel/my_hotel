@@ -1,230 +1,109 @@
 #include <iostream> 
 #include <string>
-#include "list.h"
+#include <vector>
+#include "windows.h"
+
+#include "list.h" // в этом файле находится реализация двусвязного упорядоченного списка
+#include "objects.h" // в этом файле находятся все объекты предметной области и их функции, включая стратегию
+#include "release.h" // в файле release.ccp находятся функции, нужные для реализации интерфейса
 
 using namespace std;
-// 
 
 // Гостиница.
 // Сущности: дата, персона, ВИП-персона, комната, бронь, работник.
-//
-//дальше можно не читать
-//
+// 
+// дальше можно не читать
+//  
 // нужно сделать: 
 // 3: Контейнер + итератор. Отдельный хедер
 // 4: Внедрить стратегию или хотя бы команду
 // 
 // ?добавить?:
 // 
-// - разные работники
-// - расчёт зарплаты
-// - расчёт счетов за различные услуги, в сумме за всё пребывание
-// - доп. услуги
-// - таймер брони
-// - очередь на бронирование
-// - событие в номере
+// - расчёт счетов за различные услуги, в сумме за всё пребывание +
+// - доп. услуги +
+// - таймер брони +-
+// - очередь на бронирование + 
+// 
+// ?как внедрить мой список?:
+// - список броней, расположены по порядку в соответствии с тем, 
+// какая бронь заканчивается раньше, т.к. её мы будем удалять первой,
+// т.е. отсортированы по дате выезда
+// также у нас есть определенное кол-во комнат. они будут где-то храниться
+// когда человек приходит, для него ищется подходящая комната(свободная)
+// создаётся бронь с этой комнатой, она занята пока бронь не закончится. 
+// если комнат подходящих нет, бронь не создаётся, чел уходит
 // 
 //
 
 
-// дата 
-class date { 
-private:
-		int day; // день
-		int month; // месяц 
-		int year; // год
-public: 
-    date(int d, int m, int y) {
-		if ((d > 0)&&(d<32))
-			day = d;
-		else {
-			cout << "incorrect day";
-			day = 1;
-		}
-		if ((m>0)&&(m<13))
-			month = m;
-		else {
-			cout << "incorrect month";
-				month = 1;
-		}
-		if ((y>1800)&&(y<2200))
-			year = y;
-		else {
-			cout << "incorrect year";
-				year = 1111;
-		}
-	}
-
-	// перегрузка оператора присваивания
-	date &operator= (const date d)
-	{
-		day = d.day;
-		month = d.month;
-		year = d.year;
-
-		return *this;
-	}
-
-	// конструктор копирования
-	date(const date& d) {
-		day = d.day;
-		month = d.month;
-		year = d.year;
-	}
-
-
-	// печать
-	void print() {
-		if (day < 10) cout << "0";
-		cout << day << ".";
-		if (month < 10) cout << "0";
-		cout << month << "." << year << "\n";
-	}
-
-	};
-
-// сведения о персоне
-class person {
-private: 
-	string FIO; // ФИО
-	date birth = date( 1, 1, 2001 ); // дата рождения
-public:
-	void setPerson(string fio, date b) {
-		FIO = fio;
-		birth = b;
-	}
-	void print() {
-		cout << FIO << " ";
-		birth.print();
-	}
-	template <class T>
-	friend class employee; // дружественный шаблон работник
-};
-
-//сведения о номерах гостиницы
-class room {
-private:
-	int number; // номер комнаты
-	int price; // цена номера
-public:
-	void setRoom(int n, int p) {
-		if (n>0)
-			number = n;
-		else cout << "incorrect number";
-		if (p>0) 
-			price = p;
-		else cout << "incorrect price";
-	}
-};
-
-// бронь
-class reservation {
-private:
-	person quest; // сведения о постояльце
-	room residence; // сведения о занятом им номере
-	date arrival; // дата заселения
-	date exit; // дата выезда из гостиницы
-public:
-	void setReservation(person q, room r, date d1, date d2) {
-		quest = q;
-		residence = r;
-		arrival = d1;
-		exit = d2;
-	}
-
-};
-
-// VIP персона
-class VIP_person : public person {
-private:
-	int VIP_status = 1; // уровень статуса
-public:
-	void setStatus(int s) {
-		VIP_status = s;
-	}
-	void printStatus() {
-		cout << "VIP status = " << VIP_status << endl;
-	}
-};
-
-template <class T>
-//работник, также относится к персоне
-class employee : public person {
-private:
-	date start_work = date(1, 1, 2001); // дата начала работы
-	string post; // занятый пост
-	T salary; // зарплата // значение любого типа
-public:
-	employee(date s, string p, T sal) {
-		start_work = s;
-		post = p;
-		salary = sal;
-	}
-
-	void print() {
-		//cout << start_work << endl;
-		cout << FIO << " ";
-		birth.print();
-		cout << "Start work: ";
-		start_work.print();
-		cout << post << ", " << "salary: " << salary << "\n";
-	}
-};
-
 int main() {
-	ord_list<int> list1;
-	list1.add(2);
-     
-	ord_list<int>::Iterator list_iter;
-	list_iter = list1.begin();
-	cout << *list_iter << endl;
-	list1.add(1);
-	--list_iter;
-	cout << *list_iter << endl;
-	list1.add(1);
-	list1.add(0);
-	list1.add(9);
-	list1.add(10);
-	list_iter = list1.find(9);
-	cout << *list_iter << endl;
-    auto iter2 = list1.begin();
-	cout << *iter2 << endl;
 
-	for (list_iter = list1.begin(); list_iter != list1.end(); ++list_iter)
-	{
-		cout << *list_iter << " ";
-	}
-	cout << endl;
+room rooms; rooms.setRoom(0, 0);
+vector<room> vec_rooms;
+vec_rooms.push_back(rooms);
+
+for (int i = 1; i < 5; ++i) {
+	rooms.setRoom(i, 1000);
+	vec_rooms.push_back(rooms);
+}
+
+person per1;
+date d1(20, 1, 2022);
+date d2(22, 1, 2022);
+//per1.setPerson("Ivanov Billy Billivich", a);
+ord_list<reservation> reservations;
+reservation res1;
+ord_list<reservation>::Iterator list_iter = reservations.begin();
 
 
+string name = "";
+int i = 0;
+int d = 20, m = 4, days;
+while (i < 11) {
+
+	d1.setDate(d + i, 4, 2022);
+	cout << "Today date: ";
+	d1.print();
+	cout << "Welcome! Please enter your name: ";
+	cin >> name;
+	if (name == "0") break;
+	cout << "How long days do you want to stay here? ";
+	cin >> days;
+	if ((!cin) || (days <= 0)) break;
 
 
-/*
-	date a(3, 1, 2000);
-	date b(a);
-	a.print(); 
-	b.print();
-	a = b;
-	cout << "-------------\n";
-	a.print();
-	b.print();
-	cout << "--------------------------\n";
-	VIP_person Ann;
-	cout << "VIP person: \n";
-	Ann.setPerson("Madison Ann Rat", a);
-	Ann.print();
-	Ann.printStatus();
-	cout << "----------------------------------\n";
-	cout << "emlpoyee1: \n";
-	employee<string> Ivan(a, "Cleaner", "food");
-	Ivan.setPerson("Ivanov Ivan Ivanovich", a);
-	Ivan.print();
-	cout << "----------------------------------\n";
-	cout << "emlpoyee2: \n";
-	employee<double> Anton(a, "Manager", 50000.5);
-	Anton.setPerson("Anton Antonov Antonovich", a);
-	Anton.print();
-*/
+	if (d + i + days > 30) d2.setDate((d + i + days) - 30 * ((d + i + days) / 30), m + ((d + i + days) / 30), 2022);
+	else
+		d2.setDate(d + i + days, m, 2022);
+	per1.setPerson(name);
+	bool b = res1.setReservation(per1, vec_rooms, d1, d2);
+	if (!b) {
+		cout << "Thanks! Your room is ";
+		res1.infoRoom();
+		reservations.add(res1);
+		cout << "\nDo you want something else?\n";
+		list_iter = reservations.find(res1);
+		button(list_iter);	
+		}
 
-	system("pause");
+	list_iter = reservations.begin();
+	while ((*list_iter).getExit() == d1) {
+		(*list_iter).freeRoom(vec_rooms);
+		cout << (*list_iter).getNamePerson() << ", thanks for the stay, total check is " << (*list_iter).getCheck() <<" roubles. Goodbye!\n";
+		reservations.pop_front();
+		list_iter = reservations.begin();
+		}
+
+	Sleep(100);
+	cout << " . ";
+	Sleep(100);
+	cout << " . ";
+	Sleep(100);
+	cout << " . \n\n";
+	i++;
+}
+cout << "Thanks for living here, but we are closed!\n";
+
+system("pause");
 }
