@@ -20,9 +20,9 @@ class ord_list
 protected:
 	int size = 0;
 	list<temp>* h, * t;
+	//temp comp;
 
 public:
-
 
 	class Iterator {
 		friend class ord_list<temp>;
@@ -135,7 +135,7 @@ public:
 	}
 
 	// изъять элемент с начала
-	void push_front() {
+	void pop_front() {
 		list<temp>* cur = new list<temp>;
 		cur = h;
 		if (h != NULL) {
@@ -146,7 +146,8 @@ public:
 				//cur = h;
 			}
 			else {
-				cur->last->next = NULL;
+				h = h->next;
+				h->last = NULL;
 				delete cur;
 				cur = h;
 				h = cur;
@@ -157,7 +158,7 @@ public:
 	}
 
 	// изъять элемент с конца
-	void push_back() {
+	void pop_back() {
 		list<temp>* cur = new list<temp>;
 		cur = t;
 		if (t != NULL) {
@@ -168,8 +169,7 @@ public:
 				//cur = h;
 			}
 			else {
-				t = t->next;
-				t->last = NULL;
+				cur->last->next = NULL;
 				delete(cur);
 				cur = NULL;
 			}
@@ -194,7 +194,5 @@ public:
 		return size;
 	}
 };
-
-
 
 
