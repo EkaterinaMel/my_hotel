@@ -2,6 +2,7 @@
 #include <iostream> 
 #include <string>
 #include <vector>
+#include <chrono>
 #include "list.h"
 
 using namespace std;
@@ -11,135 +12,19 @@ using namespace std;
 // Гостиница.
 // Сущности: дата, персона, ВИП-персона, комната, бронь, работник.
 
-// дата 
-class date {
-private:
-	int day; // день
-	int month; // месяц 
-	int year; // год
-public:
-	date() {}
-	date(int d, int m, int y) {
-		if ((d > 0) && (d < 32))
-			day = d;
-		else {
-			cout << "incorrect day";
-			day = 1;
-		}
-		if ((m > 0) && (m < 13))
-			month = m;
-		else {
-			cout << "incorrect month";
-			month = 1;
-		}
-		if ((y > 1800) && (y < 2200))
-			year = y;
-		else {
-			cout << "incorrect year";
-			year = 1111;
-		}
-	}
-
-	void setDate(int d, int m, int y) {
-		if ((d > 0) && (d < 32))
-			day = d;
-		else {
-			cout << "incorrect day";
-			day = 1;
-		//	return 1;
-		}
-		if ((m > 0) && (m < 13))
-			month = m;
-		else {
-			cout << "incorrect month";
-			month = 1;
-		//	return 1;
-		}
-		if ((y > 1800) && (y < 2200)){
-			year = y;
-		//	return 0;
-		}
-		else {
-			cout << "incorrect year";
-			year = 1111;
-		//	return 1;
-		}
-	}
-
-	// перегрузка оператора присваивания
-	date& operator= (const date d)
-	{
-		if ((d.day > 0) && (d.month > 0) && (d.year > 0)) {
-			day = d.day;
-			month = d.month;
-			year = d.year;
-		}
-		else cout << "Error data!!!\n";
-
-		return *this;
-	}
-
-	bool operator < (const date& d) {
-		if (year < d.year)
-			return true;
-		else if (year == d.year) {
-			if (month < d.month) return true;
-			else if (month == d.month) {
-				return (day < d.day);
-			}
-			else return false;
-		}
-		else return false;
-
-	}
-	bool operator > (const date& d) {
-		if (year > d.year)
-			return true;
-		else if (year == d.year) {
-			if (month > d.month) return true;
-			else if (month == d.month) {
-				return (day > d.day);
-			}
-			else return false;
-		}
-		else return false;
-	}
-	bool operator == (const date& d) {
-		return ((year == d.year) && (month == d.month) && (day == d.day));
-
-	}
-
-	// конструктор копирования
-	date(const date& d) {
-		if ((d.day > 0) && (d.month > 0) && (d.year > 0)) {
-			day = d.day;
-			month = d.month;
-			year = d.year;
-		}
-		else cout << "Error data!!!\n";
-	}
-
-	// печать
-	void print() {
-		if (day < 10) cout << "0";
-		cout << day << ".";
-		if (month < 10) cout << "0";
-		cout << month << "." << year << "\n";
-	}
-
-};
 
 // сведения о персоне
 class person {
 private:
 	string FIO; // ФИО
-	date birth = date(1, 1, 2001); // дата рождения
+//	date birth = date(1, 1, 2001); 
+	chrono::year_month_day birth{ chrono::April / 1 / 2001 }; // дата рождения
 public:
 	person() {}
 	void setPerson(string fio) {
 		FIO = fio;
 	}
-	void setPerson(string fio, date b) {
+	void setPerson(string fio, chrono::year_month_day b) {
 		FIO = fio;
 		birth = b;
 	}
@@ -148,17 +33,13 @@ public:
 	}
 	void print() {
 		cout << FIO << " ";
-		birth.print();
+		cout << birth;
 	}
-	bool operator !=(person r) {
-		if (FIO == r.FIO)
-			return 0;
-		else return 1;
+	bool operator !=(const person& r) {
+		return !(FIO == r.FIO);
 	}
-	bool operator ==(person r) {
-		if (FIO == r.FIO)
-			return 1;
-		else return 0;
+	bool operator ==(const person& r) {
+		return (FIO == r.FIO);
 	}
 	template <class T>
 	friend class employee; // дружественный шаблон работник
@@ -171,7 +52,7 @@ private:
 	int number = 0; // номер комнаты
 	int price = 0; // цена номера
 protected:
-	bool status = 0; // свободна(0) или занята(1)
+	bool status = false; // свободна(0) или занята(1)
 
 public:
 	static bool all_status; // если заняты все комнаты = 1 
@@ -188,15 +69,11 @@ public:
 		cout << "Room numder: " << number << "\t" << "Price: " << price << "\t" << "Status: " << status << "\n";
 	}
 
-	bool operator ==(room r) {
-		if (number == r.number)
-			return 1;
-		else return 0;
+	bool operator ==(const room& r) {
+		return (number == r.number);
 	}
-	bool operator !=(room r) {
-		if (number == r.number)
-			return 0;
-		else return 1;
+	bool operator !=(const room& r) {
+		return !((number == r.number));
 	}
 };
 
@@ -205,30 +82,30 @@ class reservation {
 private:
 	person quest; // сведения о постояльце
 	room residence; // сведения о занятом им номере
-	date arrival; // дата заселения
-	date exit; // дата выезда из гостиницы
+	chrono::year_month_day arrival; // дата заселения
+	chrono::year_month_day exit; // дата выезда из гостиницы
 	int check = 0; // общий счет за пребывание и услуги
 public:
 
 	reservation() {};
-	bool setReservation(person q, vector<room>& vec_rooms, date d1, date d2) {
+	bool setReservation(person q, vector<room>& vec_rooms, chrono::year_month_day d1, chrono::year_month_day d2) {
 		int i = 1;
-		while ((vec_rooms[i].status == 1) && (i < vec_rooms.size() - 1)) {
+		while ((vec_rooms[i].status) && (i < vec_rooms.size() - 1)) {
 			++i;
 		}
-		if (vec_rooms[i].status == 0) {
+		if (!(vec_rooms[i].status)) {
 			residence = vec_rooms[i];
 			quest = q;
 			arrival = d1;
 			exit = d2;
-			vec_rooms[i].status = 1;
+			vec_rooms[i].status = true;
 			check = vec_rooms[i].price;
-			return 0;
+			return false;
 
 		}
 		else {
 			cout << "No vacant rooms!\n";
-			return 1;
+			return true;
 			//			vec_rooms[0].all_status = 1;
 		}
 
@@ -239,7 +116,7 @@ public:
 		cout << residence.number << ", " << "cost " << residence.price << " roubles" << "\n";
 	}
 
-	date getExit() {
+	chrono::year_month_day getExit() {
 		return exit;
 	}
 
@@ -248,43 +125,27 @@ public:
 	}
 
 	void freeRoom(vector<room>& vec_rooms) {
-		vec_rooms[residence.number].status = 0;
+		vec_rooms[residence.number].status = false;
 		//vec_rooms[0].all_status = 0;
 
 
 	}
 
 	// по дате выезда!!
-	bool operator <(reservation r) {
+	bool operator <(const reservation& r) {
 		return (exit < r.exit);
 
 	}
-	bool operator >(reservation r) {
-		return (r.exit < exit);
+	bool operator >(const reservation& r) {
+		return (exit > r.exit);
 
 	}
-	bool operator ==(reservation r) {
-		if (quest == r.quest)
-			if (residence == r.residence)
-				if (arrival == r.arrival)
-					if (exit == r.exit)
-						return 1;
-					else return 0;
-				else return 0;
-			else return 0;
-		else return 0;
+	bool operator ==(const reservation& r) {
+		return (quest == r.quest) && (residence == r.residence) && (arrival == r.arrival) && (exit == r.exit);
 
 	}
-	bool operator !=(reservation r) {
-		if (quest == r.quest)
-			if (residence == r.residence)
-				if (arrival == r.arrival)
-					if (exit == r.exit)
-						return 0;
-					else return 1;
-				else return 1;
-			else return 1;
-		else return 1;
+	bool operator !=(const reservation& r) {
+		return !((quest == r.quest) && (residence == r.residence) && (arrival == r.arrival) && (exit == r.exit));
 
 	}
 	void plusCheck(int c) {
@@ -315,20 +176,19 @@ template <class T>
 //работник, также относится к персоне
 class employee : public person {
 private:
-	date start_work = date(1, 1, 2001); // дата начала работы
+	chrono::year_month_day start_work{ chrono::April, 1, 2001 }; // дата начала работы
 	string post; // занятый пост
 	T salary; // зарплата // значение любого типа
 public:
-	employee(date s, string p, T sal) {
+	employee(chrono::year_month_day s, string p, T sal) {
 		start_work = s;
 		post = p;
 		salary = sal;
 	}
 
 	void print() {
-		//cout << start_work << endl;
-		cout << FIO << " ";
-		birth.print();
+		cout << FIO << " " << birth;
+		//birth.print();
 		cout << "Start work: ";
 		start_work.print();
 		cout << post << ", " << "salary: " << salary << "\n";
